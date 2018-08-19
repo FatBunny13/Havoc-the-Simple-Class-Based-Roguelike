@@ -345,9 +345,9 @@ def main():
 
         else:
             libtcod.console_clear(con)
-            play_game(player, entities, game_map, message_log, game_state, con, constants
+            play_game(player, entities, game_map, message_log, game_state, con, constants)
 
-            show_main_menu = True;
+            show_main_menu = True
 
 
 if __name__ == '__main__':

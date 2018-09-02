@@ -16,6 +16,7 @@ from game_messages import MessageLog
 from game_states import GameStates
 
 from map_objects.game_map import GameMap
+from character import Gender
 
 from render_functions import RenderOrder
 
@@ -107,5 +108,6 @@ def get_game_variables(constants):
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
 
     game_state = GameStates.CHARACTER_CREATION
+    ggender = Gender.male
 
-    return player, entities, game_map, message_log, game_state
+    return player, entities, game_map, message_log, game_state, ggender

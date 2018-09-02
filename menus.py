@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 
+from character import Gender
 
 def menu(con, header, options, width, screen_width, screen_height):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
@@ -77,9 +78,6 @@ def main_menu(con, background_image, screen_width, screen_height):
     libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height - 2), libtcod.BKGND_NONE, libtcod.CENTER,
                              'Coding by Alfonso Abraham. Additional Coding and Bugfixing by Julie Abraham.')
 
-    libtcod.console_print_ex(0, int(screen_width + 23), int(screen_height + 1), libtcod.BKGND_NONE, libtcod.CENTER,
-    						 'Choose your race.')
-
     menu(con, '', ['Start a game','Continue last game', 'Quit'], 24, screen_width, screen_height)
     
 def character_creation_menu(con, header, player, menu_width, screen_width, screen_height):
@@ -118,6 +116,13 @@ def job_selection_menu(con, header, player, menu_width, screen_width, screen_hei
 
     menu(con, header, options, menu_width, screen_width, screen_height)
 
+def skill_selection_menu(con, header, player, menu_width, screen_width, screen_height):
+    options = ['Priest'.format(player.fighter.max_hp),
+               'Fighter '.format(player.fighter.max_hp),
+               'Thief'.format(player.fighter.max_hp),]
+
+    menu(con, header, options, menu_width, screen_width, screen_height)
+
 
 def character_screen(player, character_screen_width, character_screen_height, screen_width, screen_height):
     window = libtcod.console_new(character_screen_width, character_screen_height)
@@ -141,7 +146,7 @@ def character_screen(player, character_screen_width, character_screen_height, sc
     libtcod.console_print_rect_ex(window, 0, 9, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
                                   libtcod.LEFT, 'Race: {0}'.format(player.fighter.race))
     libtcod.console_print_rect_ex(window, 0, 9, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
-                                  libtcod.LEFT, 'Gender: {0}'.format(player.fighter.gender))
+                                  libtcod.LEFT, 'Gender: {0}'.format(Gender.male))
 
     x = screen_width // 2 - character_screen_width // 2
     y = screen_height // 2 - character_screen_height // 2

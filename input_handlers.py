@@ -1,5 +1,4 @@
 import libtcodpy as libtcod
-import initialize_new_game
 
 
 from game_states import GameStates
@@ -26,6 +25,8 @@ def handle_keys(key, game_state):
     elif game_state == GameStates.GENDER_SELECTION:
         return handle_gender_selection(key)
     elif game_state == GameStates.JOB_SELECTION:
+        return handle_job_selection(key)
+    elif game_state == GameStates.SKILL_SELECTION:
         return handle_job_selection(key)
 
     return {}
@@ -144,6 +145,22 @@ def handle_level_up_menu(key):
             return {'level_up': 'def'}
         elif key_char == 'd':
             return {'level_up': 'agi'}
+
+
+    return {}
+
+def handle_skill_selection(key):
+    if key:
+        key_char = chr(key.c)
+
+        if key_char == 'a' and player.fighter.thief_level == 2:
+            return {'skill_selection': 'hp'}
+        elif key_char == 'b':
+            return {'skill_selection': 'str'}
+        elif key_char == 'c':
+            return {'skill_selection': 'def'}
+        elif key_char == 'd':
+            return {'skill_selection': 'agi'}
 
 
     return {}

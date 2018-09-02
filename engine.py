@@ -5,12 +5,12 @@ from entity import get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_messages import Message
 from game_states import GameStates
-from input_handlers import handle_keys, handle_mouse, handle_main_menu
 from initialize_new_game import get_constants, get_game_variables
+from input_handlers import handle_keys, handle_mouse, handle_main_menu
 from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
 from render_functions import clear_all, render_all
-
+from character import Gender
 
 def play_game(player, entities, game_map, message_log, con, panel, constants):
     fov_recompute = True
@@ -20,10 +20,13 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
     key = libtcod.Key()
     mouse = libtcod.Mouse()
 
+
     game_state = GameStates.CHARACTER_CREATION
     previous_game_state = game_state
 
     targeting_item = None
+    ggender = Gender.male
+
 
     while not libtcod.console_is_window_closed():
 
@@ -58,6 +61,7 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
         character_creation = action.get('character_creation')
         job = action.get('job')
         gender = action.get('gender')
+        skill_selection = action.get('skill_selection')
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
 
@@ -86,6 +90,15 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
 
         elif wait:
             game_state = GameStates.ENEMY_TURN
+
+        elif gender == Gender.male:
+            player.fighter.gender = 1
+
+        elif gender == Gender.female:
+            player.fighter.gender = 2
+
+        elif gender == Gender.agender:
+            player.fighter.gender = 3
 
         elif pickup and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
@@ -195,19 +208,33 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
             libtcod.console_clear(con)
             game_state = GameStates.GENDER_SELECTION
 
+        if skill_selection:
+            if player.fighter.thief_level == 1:
+                player.fighter.base_max_hp += 20
+            elif player.fighter.priest_level == 1:
+                player.fighter.base_power += 1
+            libtcod.console_flush()
+            libtcod.console_clear(con)
+            game_state = GameStates.PLAYERS_TURN
+        # damn son thats a lot of menus
+        # like a lot
+
         if gender:
                 if gender == 'm':
                     player.fighter.base_max_hp += 20
                     player.fighter.hp += 20
                     player.fighter.gender += 1
+                    ggender == Gender.male
                 elif gender == 'f':
                     player.fighter.base_power += 5
                     player.fighter.base_max_hp -= 20
                     player.fighter.hp -= 20
                     player.fighter.gender += 2
+                    ggender == Gender.female
                 elif gender == 'a':
                     player.fighter.base_defense += 1
                     player.fighter.gender += 3
+                    ggender == Gender.agender
                 libtcod.console_flush()
                 libtcod.console_clear(con)
                 game_state = GameStates.PLAYERS_TURN
@@ -372,6 +399,7 @@ def main():
     game_map = None
     message_log = None
     game_state = None
+    ggender = None
 
     show_main_menu = True
     show_load_error_message = False
@@ -402,13 +430,13 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state = get_game_variables(constants)
+                player, entities, game_map, message_log, game_state, ggender = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
 
                 show_main_menu = False
             elif load_saved_game:
                 try:
-                    player, entities, game_map, message_log, game_state = load_game()
+                    player, entities, game_map, message_log, game_state, ggender = load_game()
                     show_main_menu = False
                 except FileNotFoundError:
                     show_load_error_message = True

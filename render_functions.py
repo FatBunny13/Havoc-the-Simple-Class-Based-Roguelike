@@ -4,7 +4,7 @@ from enum import Enum
 
 from game_states import GameStates
 
-from menus import character_screen, inventory_menu, level_up_menu, character_creation_menu, gender_selection_menu, job_selection_menu
+from menus import character_screen, inventory_menu, level_up_menu, character_creation_menu, gender_selection_menu, job_selection_menu, skill_selection_menu
 
 
 class RenderOrder(Enum):
@@ -113,6 +113,9 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
 
     elif game_state == GameStates.JOB_SELECTION:
         job_selection_menu(con, 'Congratulations! You have gained a level! Pick a job!:', player, 40, screen_width, screen_height)
+
+    elif game_state == GameStates.SKILL_SELECTION:
+        job_selection_menu(con, 'You have gained a skill! Which button should it go in?:', player, 40, screen_width,screen_height)
 
 
 def clear_all(con, entities):

@@ -154,8 +154,6 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
                 player.fighter.base_power += 1
             elif level_up == 'def':
                 player.fighter.base_defense += 1
-            elif level_up == 'agi':
-                player.fighter.base_agility += 1
             libtcod.console_flush()
             libtcod.console_clear(con)
             game_state = GameStates.JOB_SELECTION
@@ -168,11 +166,13 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
                 player.fighter.priest_level += 1
             elif job == 'fig':
                 player.fighter.base_power += 2
+                player.fighter.base_defense += 1
                 player.fighter.job += 2
                 player.fighter.fighter_level += 1
             elif job == 'thi':
                 player.fighter.base_defense += 2
-                player.fighter.base_agility += 2
+                player.fighter.base_power += 1
+                player.fighter.base_agility += 0.5
                 player.fighter.job += 3
                 player.fighter.thief_level += 1
             libtcod.console_flush()

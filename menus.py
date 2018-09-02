@@ -96,8 +96,7 @@ def character_creation_menu(con, header, player, menu_width, screen_width, scree
 def level_up_menu(con, header, player, menu_width, screen_width, screen_height):
     options = ['Constitution (+20 HP, from {0})'.format(player.fighter.max_hp),
                'Strength (+1 attack, from {0})'.format(player.fighter.power),
-               'Defense (+1 defense, from {0})'.format(player.fighter.defense),
-    'Agility (+1 agility, from {0}'.format(player.fighter.agility)]
+               'Defense (+1 defense, from {0})'.format(player.fighter.defense)]
 
     menu(con, header, options, menu_width, screen_width, screen_height)
 

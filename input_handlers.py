@@ -67,6 +67,9 @@ def handle_player_turn_keys(key):
     elif key.vk == libtcod.KEY_ENTER:
         return {'take_stairs': True}
 
+    elif key.text == '<':
+        return {'take_upstairs': True}
+
     elif key_char == 'c':
         return {'show_character_screen': True}
 

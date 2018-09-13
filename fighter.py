@@ -43,7 +43,7 @@ class Fighter:
         else:
             bonus = 0
 
-        return (self.base_power + self.agility) / 2 + bonus
+        return (self.base_power + self.agility) + bonus
 
     @property
     def defense(self):
@@ -52,7 +52,7 @@ class Fighter:
         else:
             bonus = 0
 
-        return (self.base_defense + self.agility) / 2 + bonus + 1
+        return (self.base_defense + self.agility) + bonus
 
     def take_damage(self, amount):
         results = []

@@ -56,6 +56,7 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
         drop_inventory = action.get('drop_inventory')
         inventory_index = action.get('inventory_index')
         take_stairs = action.get('take_stairs')
+        take_upstairs = action.get('take_upstairs')
         level_up = action.get('level_up')
         show_character_screen = action.get('show_character_screen')
         character_creation = action.get('character_creation')
@@ -64,7 +65,6 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
         skill_selection = action.get('skill_selection')
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
-
         left_click = mouse_action.get('left_click')
         right_click = mouse_action.get('right_click')
 
@@ -141,6 +141,18 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
                     entities = game_map.next_floor(player, message_log, constants)
                     fov_map = initialize_fov(game_map)
                     fov_recompute = True
+
+                    break
+            else:
+                message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
+
+        if take_upstairs and game_state == GameStates.PLAYERS_TURN:
+            for entity in entities:
+                if entity.stairs and entity.x == player.x and entity.y == player.y:
+                    entities = game_map.previous_floor(player, message_log, constants)
+                    fov_map = initialize_fov(game_map)
+                    fov_recompute = True
+                    libtcod.console_clear(con)
 
                     break
             else:

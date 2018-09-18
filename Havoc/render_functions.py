@@ -4,14 +4,15 @@ from enum import Enum
 
 from game_states import GameStates
 
-from menus import character_screen, inventory_menu, level_up_menu, character_creation_menu
+from menus import character_screen, inventory_menu, level_up_menu, character_creation_menu, gender_selection_menu, job_selection_menu, skill_selection_menu
 
 
 class RenderOrder(Enum):
     STAIRS = 1
-    CORPSE = 2
-    ITEM = 3
-    ACTOR = 4
+    UPSTAIRS = 2
+    CORPSE = 3
+    ITEM = 4
+    ACTOR = 5
 
 
 def get_names_under_mouse(mouse, entities, fov_map):
@@ -50,17 +51,17 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
 
                 if visible:
                     if wall:
-                        libtcod.console_set_char_background(con, x, y, colors.get('light_wall'), libtcod.BKGND_SET)
+                        libtcod.console_set_char_background(con, x, y, colors['light_wall'], libtcod.BKGND_SET)
                     else:
-                        libtcod.console_set_char_background(con, x, y, colors.get('light_ground'), libtcod.BKGND_SET)
+                        libtcod.console_set_char_background(con, x, y, colors['light_ground'], libtcod.BKGND_SET)
 
                     game_map.tiles[x][y].explored = True
 
                 elif game_map.tiles[x][y].explored:
                     if wall:
-                        libtcod.console_set_char_background(con, x, y, colors.get('dark_wall'), libtcod.BKGND_SET)
+                        libtcod.console_set_char_background(con, x, y, colors['dark_wall'], libtcod.BKGND_SET)
                     else:
-                        libtcod.console_set_char_background(con, x, y, colors.get('dark_ground'), libtcod.BKGND_SET)
+                        libtcod.console_set_char_background(con, x, y, colors['dark_ground'], libtcod.BKGND_SET)
 
     entities_in_render_order = sorted(entities, key=lambda x: x.render_order.value)
 
@@ -108,6 +109,15 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
     elif game_state == GameStates.CHARACTER_CREATION:
         character_creation_menu(con, 'Brave peasant! What is your race!:', player, 40, screen_width, screen_height)
 
+    elif game_state == GameStates.GENDER_SELECTION:
+        gender_selection_menu(con, 'Brave peasant! What is your gender!:', player, 40, screen_width, screen_height)
+
+    elif game_state == GameStates.JOB_SELECTION:
+        job_selection_menu(con, 'Congratulations! You have gained a level! Pick a job!:', player, 40, screen_width, screen_height)
+
+    elif game_state == GameStates.SKILL_SELECTION:
+        job_selection_menu(con, 'You have gained a skill! Which button should it go in?:', player, 40, screen_width,screen_height)
+
 
 def clear_all(con, entities):
     for entity in entities:
@@ -115,7 +125,7 @@ def clear_all(con, entities):
 
 
 def draw_entity(con, entity, fov_map, game_map):
-    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored):
+    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or (entity.upstairs and game_map.tiles[entity.x][entity.y].explored):
         libtcod.console_set_default_foreground(con, entity.color)
         libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
 

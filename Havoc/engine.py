@@ -1,16 +1,16 @@
-import libtcodpy as libtcod
+import tcod as libtcod
 
 from death_functions import kill_monster, kill_player
 from entity import get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_messages import Message
 from game_states import GameStates
-from input_handlers import handle_keys, handle_mouse, handle_main_menu
 from initialize_new_game import get_constants, get_game_variables
+from input_handlers import handle_keys, handle_mouse, handle_main_menu
 from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
 from render_functions import clear_all, render_all
-
+from character import Gender
 
 def play_game(player, entities, game_map, message_log, con, panel, constants):
     fov_recompute = True
@@ -20,12 +20,16 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
     key = libtcod.Key()
     mouse = libtcod.Mouse()
 
-    game_state = GameStates.PLAYERS_TURN
+
+    game_state = GameStates.CHARACTER_CREATION
     previous_game_state = game_state
 
     targeting_item = None
+    ggender = Gender.male
+
 
     while not libtcod.console_is_window_closed():
+
         libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS | libtcod.EVENT_MOUSE, key, mouse)
 
         if fov_recompute:
@@ -52,9 +56,13 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
         drop_inventory = action.get('drop_inventory')
         inventory_index = action.get('inventory_index')
         take_stairs = action.get('take_stairs')
+        take_upstairs = action.get('take_upstairs')
         level_up = action.get('level_up')
         show_character_screen = action.get('show_character_screen')
         character_creation = action.get('character_creation')
+        job = action.get('job')
+        gender = action.get('gender')
+        skill_selection = action.get('skill_selection')
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
 
@@ -84,6 +92,15 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
         elif wait:
             game_state = GameStates.ENEMY_TURN
 
+        elif gender == Gender.male:
+            player.fighter.gender = 1
+
+        elif gender == Gender.female:
+            player.fighter.gender = 2
+
+        elif gender == Gender.agender:
+            player.fighter.gender = 3
+
         elif pickup and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
                 if entity.item and entity.x == player.x and entity.y == player.y:
@@ -97,10 +114,14 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
         if show_inventory:
             previous_game_state = game_state
             game_state = GameStates.SHOW_INVENTORY
+            libtcod.console_flush()
+            libtcod.console_clear(con)
 
         if drop_inventory:
             previous_game_state = game_state
             game_state = GameStates.DROP_INVENTORY
+            libtcod.console_flush()
+            libtcod.console_clear(con)
 
         if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(
                 player.inventory.items):
@@ -108,13 +129,28 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
 
             if game_state == GameStates.SHOW_INVENTORY:
                 player_turn_results.extend(player.inventory.use(item, entities=entities, fov_map=fov_map))
+                libtcod.console_flush()
+                libtcod.console_clear(con)
             elif game_state == GameStates.DROP_INVENTORY:
                 player_turn_results.extend(player.inventory.drop_item(item))
+                libtcod.console_flush()
+                libtcod.console_clear(con)
 
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
                 if entity.stairs and entity.x == player.x and entity.y == player.y:
                     entities = game_map.next_floor(player, message_log, constants)
+                    fov_map = initialize_fov(game_map)
+                    fov_recompute = True
+
+                    break
+            else:
+                message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
+
+        if take_upstairs and game_state == GameStates.PLAYERS_TURN:
+            for entity in entities:
+                if entity.stairs and entity.x == player.x and entity.y == player.y:
+                    entities = game_map.previous_floor(player, message_log, constants)
                     fov_map = initialize_fov(game_map)
                     fov_recompute = True
                     libtcod.console_clear(con)
@@ -131,31 +167,90 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
                 player.fighter.base_power += 1
             elif level_up == 'def':
                 player.fighter.base_defense += 1
-            elif level_up == 'agi':
-                player.fighter.base_agility += 1
+            libtcod.console_flush()
+            libtcod.console_clear(con)
+            game_state = GameStates.JOB_SELECTION
+
+        if job:
+            if job == 'pri':
+                player.fighter.base_max_hp += 20
+                player.fighter.hp += 20
+                player.fighter.job += 1
+                player.fighter.priest_level += 1
+            elif job == 'fig':
+                player.fighter.base_power += 2
+                player.fighter.base_defense += 1
+                player.fighter.job += 2
+                player.fighter.fighter_level += 1
+            elif job == 'thi':
+                player.fighter.base_defense += 2
+                player.fighter.base_power += 1
+                player.fighter.base_agility += 0.5
+                player.fighter.job += 3
+                player.fighter.thief_level += 1
+            libtcod.console_flush()
+            libtcod.console_clear(con)
+            game_state = GameStates.PLAYERS_TURN
 
         if character_creation:
-            if race == 'mern':
+            if character_creation == 'mern':
                 player.fighter.base_max_hp += 20
                 player.fighter.hp += 20
                 player.fighter.race += 1
-            elif level_up == 'avis':
+            elif character_creation == 'avis':
                 player.fighter.base_power += 1
                 player.fighter.race += 2
-            elif level_up == 'lepra':
+            elif character_creation == 'lepra':
                 player.fighter.base_defense += 1
                 player.fighter.race += 3
-            elif level_up == 'giant':
-                player.fighter.base_agility += 1
+            elif character_creation == 'giant':
+                player.fighter.base_agility -= 5
+                player.fighter.base_power += 6
+                player.fighter.hp += 60
+                player.fighter.base_max_hp += 60
                 player.fighter.race += 4
-            elif level_up == 'change':
-                player.fighter.base_agility += 1
+            elif character_creation == 'change':
+                player.fighter.base_agility += 2
                 player.fighter.race += 5
-            elif level_up == 'fae':
-                player.fighter.base_agility += 1
+            elif character_creation == 'fae':
+                player.fighter.base_agility += 10
+                player.fighter.hp -= 75
+                player.fighter.base_max_hp -= 75
                 player.fighter.race += 6
+            libtcod.console_flush()
+            libtcod.console_clear(con)
+            game_state = GameStates.GENDER_SELECTION
 
-            game_state = previous_game_state
+        if skill_selection:
+            if player.fighter.thief_level == 1:
+                player.fighter.base_max_hp += 20
+            elif player.fighter.priest_level == 1:
+                player.fighter.base_power += 1
+            libtcod.console_flush()
+            libtcod.console_clear(con)
+            game_state = GameStates.PLAYERS_TURN
+        # damn son thats a lot of menus
+        # like a lot
+
+        if gender:
+                if gender == 'm':
+                    player.fighter.base_max_hp += 20
+                    player.fighter.hp += 20
+                    player.fighter.gender += 1
+                    ggender == Gender.male
+                elif gender == 'f':
+                    player.fighter.base_power += 5
+                    player.fighter.base_max_hp -= 20
+                    player.fighter.hp -= 20
+                    player.fighter.gender += 2
+                    ggender == Gender.female
+                elif gender == 'a':
+                    player.fighter.base_defense += 1
+                    player.fighter.gender += 3
+                    ggender == Gender.agender
+                libtcod.console_flush()
+                libtcod.console_clear(con)
+                game_state = GameStates.PLAYERS_TURN
 
         if show_character_screen:
             previous_game_state = game_state
@@ -168,16 +263,26 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
                 item_use_results = player.inventory.use(targeting_item, entities=entities, fov_map=fov_map,
                                                         target_x=target_x, target_y=target_y)
                 player_turn_results.extend(item_use_results)
+                libtcod.console_flush()
+                libtcod.console_clear(con)
             elif right_click:
                 player_turn_results.append({'targeting_cancelled': True})
+                libtcod.console_flush()
+                libtcod.console_clear(con)
 
         if exit:
             if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
                 game_state = previous_game_state
+                libtcod.console_flush()
+                libtcod.console_clear(con)
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
+                libtcod.console_flush()
+                libtcod.console_clear(con)
             else:
                 save_game(player, entities, game_map, message_log, game_state)
+                libtcod.console_flush()
+                libtcod.console_clear(con)
 
                 return True
 
@@ -257,6 +362,7 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
                     game_state = GameStates.LEVEL_UP
 
         if game_state == GameStates.ENEMY_TURN:
+
             for entity in entities:
                 if entity.ai:
                     enemy_turn_results = entity.ai.take_turn(player, fov_map, game_map, entities)
@@ -293,6 +399,12 @@ def main():
     libtcod.console_init_root(constants['screen_width'], constants['screen_height'], constants['window_title'], False)
 
     con = libtcod.console_new(constants['screen_width'], constants['screen_height'])
+
+    # Debugging info: at this point con is a big integer. Later on we find that it is something
+    # else. What is going on?
+    # Hopefully fixed. Most likely an error in libtcod engine. Fixed when moving to more python
+    # specific engine. Python-tcod
+
     panel = libtcod.console_new(constants['screen_width'], constants['panel_height'])
 
     player = None
@@ -300,6 +412,7 @@ def main():
     game_map = None
     message_log = None
     game_state = None
+    ggender = None
 
     show_main_menu = True
     show_load_error_message = False
@@ -330,13 +443,13 @@ def main():
             if show_load_error_message and (new_game or load_saved_game or exit_game):
                 show_load_error_message = False
             elif new_game:
-                player, entities, game_map, message_log, game_state = get_game_variables(constants)
+                player, entities, game_map, message_log, game_state, ggender = get_game_variables(constants)
                 game_state = GameStates.PLAYERS_TURN
 
                 show_main_menu = False
             elif load_saved_game:
                 try:
-                    player, entities, game_map, message_log, game_state = load_game()
+                    player, entities, game_map, message_log, game_state, ggender = load_game()
                     show_main_menu = False
                 except FileNotFoundError:
                     show_load_error_message = True
@@ -344,9 +457,9 @@ def main():
                 break
 
         else:
+            libtcod.console_flush()
             libtcod.console_clear(con)
             play_game(player, entities, game_map, message_log, game_state, con, constants)
-
             show_main_menu = True
 
 

@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 
+from character import Gender
 
 def menu(con, header, options, width, screen_width, screen_height):
     if len(options) > 26: raise ValueError('Cannot have a menu with more than 26 options.')
@@ -77,18 +78,17 @@ def main_menu(con, background_image, screen_width, screen_height):
     libtcod.console_print_ex(0, int(screen_width / 2), int(screen_height - 2), libtcod.BKGND_NONE, libtcod.CENTER,
                              'Coding by Alfonso Abraham. Additional Coding and Bugfixing by Julie Abraham.')
 
-    libtcod.console_print_ex(0, int(screen_width + 23), int(screen_height + 1), libtcod.BKGND_NONE, libtcod.CENTER,
-    						 'Choose your race.')
-
     menu(con, '', ['Start a game','Continue last game', 'Quit'], 24, screen_width, screen_height)
     
 def character_creation_menu(con, header, player, menu_width, screen_width, screen_height):
-    options = ['Mern,'.format(player.fighter.max_hp),
-    		   'Avis, '.format(player.fighter.power),
-    		   'Leprachaun'.format(player.fighter.defense),
-    		   'Giant'.format(player.fighter.agility),
-    		   'Changeling'.format(player.fighter.agility.defense),
-    		   'Dark Fae'.format(player.fighter.agility.defense)]
+    options = ['Mern'.format(player.fighter.max_hp),
+    		   'Avis '.format(player.fighter.max_hp),
+    		   'Leprachaun'.format(player.fighter.max_hp),
+    		   'Giant'.format(player.fighter.max_hp),
+    		   'Changeling'.format(player.fighter.max_hp),
+    'Dark Fae'.format(player.fighter.max_hp)]
+
+
 
     menu(con, header, options, menu_width, screen_width, screen_height)
 
@@ -96,8 +96,29 @@ def character_creation_menu(con, header, player, menu_width, screen_width, scree
 def level_up_menu(con, header, player, menu_width, screen_width, screen_height):
     options = ['Constitution (+20 HP, from {0})'.format(player.fighter.max_hp),
                'Strength (+1 attack, from {0})'.format(player.fighter.power),
-               'Defense (+1 defense, from {0})'.format(player.fighter.defense),
-    'Agility (+1 agility, from {0}'.format(player.fighter.agility)]
+               'Defense (+1 defense, from {0})'.format(player.fighter.defense)]
+
+    menu(con, header, options, menu_width, screen_width, screen_height)
+
+def gender_selection_menu(con, header, player, menu_width, screen_width, screen_height):
+    options = ['Male'.format(player.fighter.max_hp),
+               'Female '.format(player.fighter.max_hp),
+               'Agender'.format(player.fighter.max_hp),]
+
+    menu(con, header, options, menu_width, screen_width, screen_height)
+
+
+def job_selection_menu(con, header, player, menu_width, screen_width, screen_height):
+    options = ['Priest'.format(player.fighter.max_hp),
+               'Fighter '.format(player.fighter.max_hp),
+               'Thief'.format(player.fighter.max_hp),]
+
+    menu(con, header, options, menu_width, screen_width, screen_height)
+
+def skill_selection_menu(con, header, player, menu_width, screen_width, screen_height):
+    options = ['Priest'.format(player.fighter.max_hp),
+               'Fighter '.format(player.fighter.max_hp),
+               'Thief'.format(player.fighter.max_hp),]
 
     menu(con, header, options, menu_width, screen_width, screen_height)
 
@@ -123,6 +144,8 @@ def character_screen(player, character_screen_width, character_screen_height, sc
                                   libtcod.LEFT, 'Defense: {0}'.format(player.fighter.defense))
     libtcod.console_print_rect_ex(window, 0, 9, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
                                   libtcod.LEFT, 'Race: {0}'.format(player.fighter.race))
+    libtcod.console_print_rect_ex(window, 0, 9, character_screen_width, character_screen_height, libtcod.BKGND_NONE,
+                                  libtcod.LEFT, 'Gender: {0}'.format(Gender.male))
 
     x = screen_width // 2 - character_screen_width // 2
     y = screen_height // 2 - character_screen_height // 2

@@ -1,11 +1,13 @@
 import libtcodpy as libtcod
-import initialize_new_game
 
 
 from game_states import GameStates
 from fighter import Fighter
 
 def handle_keys(key, game_state):
+
+    print("---> key: %s    state: %s" % (key,game_state))
+
     if game_state == GameStates.PLAYERS_TURN:
         return handle_player_turn_keys(key)
     elif game_state == GameStates.PLAYER_DEAD:
@@ -19,7 +21,13 @@ def handle_keys(key, game_state):
     elif game_state == GameStates.CHARACTER_SCREEN:
         return handle_character_screen(key)
     elif game_state == GameStates.CHARACTER_CREATION:
-        return handle_character_screen(key)
+        return handle_character_creation(key)
+    elif game_state == GameStates.GENDER_SELECTION:
+        return handle_gender_selection(key)
+    elif game_state == GameStates.JOB_SELECTION:
+        return handle_job_selection(key)
+    elif game_state == GameStates.SKILL_SELECTION:
+        return handle_job_selection(key)
 
     return {}
 
@@ -59,6 +67,9 @@ def handle_player_turn_keys(key):
     elif key.vk == libtcod.KEY_ENTER:
         return {'take_stairs': True}
 
+    elif key.text == '<':
+        return {'take_upstairs': True}
+
     elif key_char == 'c':
         return {'show_character_screen': True}
 
@@ -85,7 +96,6 @@ def handle_player_dead_keys(key):
 
     if key_char == 'i':
         return {'show_inventory': True}
-
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
         return {'fullscreen': True}
@@ -136,8 +146,21 @@ def handle_level_up_menu(key):
             return {'level_up': 'str'}
         elif key_char == 'c':
             return {'level_up': 'def'}
+
+    return {}
+
+def handle_skill_selection(key):
+    if key:
+        key_char = chr(key.c)
+
+        if key_char == 'a' and player.fighter.thief_level == 2:
+            return {'skill_selection': 'hp'}
+        elif key_char == 'b':
+            return {'skill_selection': 'str'}
+        elif key_char == 'c':
+            return {'skill_selection': 'def'}
         elif key_char == 'd':
-            return {'level_up': 'agi'}
+            return {'skill_selection': 'agi'}
 
 
     return {}
@@ -148,17 +171,44 @@ def handle_character_creation(key):
         key_char = chr(key.c)
 
         if key_char == 'a':
-            return {'race': 'mern'}
+            return {'character_creation': 'mern'}
         elif key_char == 'b':
-            return {'race': 'avis'}
+            return {'character_creation': 'avis'}
         elif key_char == 'c':
-            return {'race': 'lepra'}
+            return {'character_creation': 'lepra'}
         elif key_char == 'd':
-            return {'race': 'giant'}
+            return {'character_creation': 'giant'}
         elif key_char == 'e':
-            return {'race': 'change'}
+            return {'character_creation': 'change'}
         elif key_char == 'f':
-            return {'race': 'fae'}
+            return {'character_creation': 'fae'}
+
+    return {}
+
+
+def handle_job_selection(key):
+    if key:
+        key_char = chr(key.c)
+
+        if key_char == 'a':
+            return {'job': 'pri'}
+        elif key_char == 'b':
+            return {'job': 'fig'}
+        elif key_char == 'c':
+            return {'job': 'thi'}
+
+    return {}
+
+def handle_gender_selection(key):
+    if key:
+        key_char = chr(key.c)
+
+        if key_char == 'a':
+            return {'gender': 'm'}
+        elif key_char == 'b':
+            return {'gender': 'f'}
+        elif key_char == 'c':
+            return {'gender': 'a'}
 
     return {}
 

@@ -1,10 +1,10 @@
 import libtcodpy as libtcod
 
 from game_messages import Message
-
+from item_functions import heal
 
 class Fighter:
-    def __init__(self, hp, defense, power, agility, race=0, xp=0):
+    def __init__(self, hp, defense, power, agility, gender=0, race=0, xp=0, job=1, priest_level=0, fighter_level=0, thief_level=0):
         self.base_max_hp = hp
         self.hp = hp
         self.base_defense = defense
@@ -12,6 +12,11 @@ class Fighter:
         self.base_agility = agility
         self.xp = xp
         self.race = race
+        self.gender = gender
+        self.job = job
+        self.priest_level = priest_level
+        self.fighter_level = fighter_level
+        self.thief_level = thief_level
 
     @property
     def agility(self):

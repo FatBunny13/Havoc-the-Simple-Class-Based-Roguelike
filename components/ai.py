@@ -43,3 +43,33 @@ class ConfusedMonster:
             results.append({'message': Message('The {0} is no longer confused!'.format(self.owner.name), libtcod.red)})
 
         return results
+
+class SlimeMonster:
+    def take_turn(self, target, fov_map, game_map, entities,):
+        results = []
+        monster = self.owner
+
+        random_x = self.owner.x + randint(0, 2) - 1
+        random_y = self.owner.y + randint(0, 2) - 1
+        if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
+            if random_x != self.owner.x and random_y != self.owner.y:
+                self.owner.move_towards(random_x, random_y, game_map, entities)
+
+                if target.fighter.hp > 0 and monster.distance_to(target) == 1:
+                    attack_results = monster.fighter.attack(target)
+                    results.extend(attack_results)
+
+        return results
+
+class ShrubMonster:
+    def take_turn(self, target, fov_map, game_map, entities):
+        results = []
+
+        monster = self.owner
+        if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
+
+            if target.fighter.hp > 0:
+                attack_results = monster.fighter.attack(target)
+                results.extend(attack_results)
+
+        return results

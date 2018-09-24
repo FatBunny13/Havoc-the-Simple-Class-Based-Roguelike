@@ -65,6 +65,7 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
         skill_selection = action.get('skill_selection')
         exit = action.get('exit')
         fullscreen = action.get('fullscreen')
+
         left_click = mouse_action.get('left_click')
         right_click = mouse_action.get('right_click')
 
@@ -102,7 +103,7 @@ def play_game(player, entities, game_map, message_log, con, panel, constants):
 
         elif pickup and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
-                if entity.item and entity.x == player.x and entity.y == player.y:
+                if (entity.item or entity.equippable) and entity.x == player.x and entity.y == player.y:
                     pickup_results = player.inventory.add_item(entity)
                     player_turn_results.extend(pickup_results)
 

@@ -36,11 +36,15 @@ def get_constants():
     message_height = panel_height - 1
 
     map_width = 80
-    map_height = 45
+    map_height = 43
 
     room_max_size = 10
     room_min_size = 6
     max_rooms = 30
+
+    maze_max_size = 2
+    maze_min_size = 2
+    max_maze_rooms = 20
 
     fov_algorithm = 0
     fov_light_walls = True
@@ -48,6 +52,10 @@ def get_constants():
 
     max_monsters_per_room = 3
     max_items_per_room = 4
+
+    min_monsters_per_room = 1
+    min_items_per_room = 1
+
 
     colors = {
         'dark_wall': libtcod.Color(0, 0, 100),
@@ -71,11 +79,16 @@ def get_constants():
         'room_max_size': room_max_size,
         'room_min_size': room_min_size,
         'max_rooms': max_rooms,
+        'maze_max_size': maze_max_size,
+        'maze_min_size': maze_min_size,
+        'max_maze_rooms': max_maze_rooms,
         'fov_algorithm': fov_algorithm,
         'fov_light_walls': fov_light_walls,
         'fov_radius': fov_radius,
         'max_monsters_per_room': max_monsters_per_room,
         'max_items_per_room': max_items_per_room,
+        'min_monsters_per_room': min_monsters_per_room,
+        'min_items_per_room': min_items_per_room,
         'colors': colors
     }
 
@@ -103,8 +116,8 @@ def get_game_variables(constants):
 
     game_map = GameMap(constants['map_width'], constants['map_height'])
     game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
-                      constants['map_width'], constants['map_height'],entities,player)
-
+                      constants['max_maze_rooms'], constants['maze_min_size'], constants['maze_max_size'],
+                      constants['map_width'], constants['map_height'], player, entities)
 
     message_log = MessageLog(constants['message_x'], constants['message_width'], constants['message_height'])
 

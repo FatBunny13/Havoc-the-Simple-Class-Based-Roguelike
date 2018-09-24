@@ -9,10 +9,10 @@ from menus import character_screen, inventory_menu, level_up_menu, character_cre
 
 class RenderOrder(Enum):
     STAIRS = 1
-    CORPSE = 2
-    ITEM = 3
-    ACTOR = 4
-    UPSTAIRS = 5
+    UPSTAIRS = 2
+    CORPSE = 3
+    ITEM = 4
+    ACTOR = 5
 
 
 def get_names_under_mouse(mouse, entities, fov_map):
@@ -125,7 +125,7 @@ def clear_all(con, entities):
 
 
 def draw_entity(con, entity, fov_map, game_map):
-    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored):
+    if libtcod.map_is_in_fov(fov_map, entity.x, entity.y) or (entity.stairs and game_map.tiles[entity.x][entity.y].explored) or (entity.upstairs and game_map.tiles[entity.x][entity.y].explored):
         libtcod.console_set_default_foreground(con, entity.color)
         libtcod.console_put_char(con, entity.x, entity.y, entity.char, libtcod.BKGND_NONE)
 

@@ -1,6 +1,8 @@
 import libtcodpy as libtcod
 
+
 from components.ai import ConfusedMonster
+
 
 from game_messages import Message
 
@@ -16,6 +18,35 @@ def heal(*args, **kwargs):
     else:
         entity.fighter.heal(amount)
         results.append({'consumed': True, 'message': Message('Your wounds start to feel better!', libtcod.green)})
+
+    return results
+
+def hide(player, entities, fov_map):
+
+    results = []
+
+    if player.fighter.stealthed == 1:
+        results.append({'stealthed': False, 'message': Message('You are already hidden!', libtcod.yellow)})
+
+    else:
+        player.fighter.stealthed += 1
+        results.append({'stealthed': True, 'message': Message('You hide in the shadows!', libtcod.yellow)})
+
+    return results
+
+def prayer(*args, **kwargs):
+    entity = args[0]
+    amount = kwargs.get('amount')
+    mana_cost = kwargs.get('mana_cost')
+
+    results = []
+
+    if entity.fighter.hp == entity.fighter.max_hp:
+        results.append({'used': False, 'message': Message('You are already at full health', libtcod.yellow)})
+    else:
+        entity.fighter.heal(amount)
+        entity.fighter.take_mana_damage(mana_cost)
+        results.append({'used': True, 'message': Message('Your wounds start to feel better!', libtcod.green)})
 
     return results
 
@@ -45,6 +76,34 @@ def cast_lightning(*args, **kwargs):
         results.extend(target.fighter.take_damage(damage))
     else:
         results.append({'consumed': False, 'target': None, 'message': Message('No enemy is close enough to strike.', libtcod.red)})
+
+    return results
+
+def cast_tornado(*args, **kwargs):
+    caster = args[0]
+    entities = kwargs.get('entities')
+    fov_map = kwargs.get('fov_map')
+    damage = kwargs.get('damage')
+    maximum_range = kwargs.get('maximum_range')
+
+    results = []
+
+    target = None
+    closest_distance = maximum_range + 1
+
+    for entity in entities:
+        if entity.fighter and entity != caster and libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+            distance = caster.distance_to(entity)
+
+            if distance < closest_distance:
+                target = entity
+                closest_distance = distance
+
+    if target:
+        results.append({'used': True, 'target': target, 'message': Message('A lighting bolt strikes the {0} with a loud thunder! The damage is {1}'.format(target.name, damage))})
+        results.extend(target.fighter.take_damage(damage))
+    else:
+        results.append({'used': False, 'target': None, 'message': Message('No enemy is close enough to strike.', libtcod.red)})
 
     return results
 

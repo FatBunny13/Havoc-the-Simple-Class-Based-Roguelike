@@ -4,7 +4,7 @@ from enum import Enum
 
 from game_states import GameStates
 
-from menus import character_screen, inventory_menu, level_up_menu, character_creation_menu, gender_selection_menu, job_selection_menu, skill_selection_menu
+from menus import character_screen, inventory_menu, level_up_menu, character_creation_menu, gender_selection_menu, job_selection_menu, skill_use_menu
 
 
 class RenderOrder(Enum):
@@ -40,8 +40,8 @@ def render_bar(panel, x, y, total_width, name, value, maximum, bar_color, back_c
                              '{0}: {1}/{2}'.format(name, value, maximum))
 
 
-def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
-               bar_width, panel_height, panel_y, mouse, colors, game_state):
+def render_all(con, panel,sidebar, entities, player, game_map, fov_map, fov_recompute, message_log, screen_width, screen_height,
+               bar_width, panel_height, panel_y,sidebar_width,sidebar_x, mouse, colors, game_state):
     if fov_recompute:
         # Draw all the tiles in the game map
         for y in range(game_map.height):
@@ -83,14 +83,25 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
 
     render_bar(panel, 1, 1, bar_width, 'HP', player.fighter.hp, player.fighter.max_hp,
                libtcod.light_red, libtcod.darker_red)
+    render_bar(panel, 1, 2, bar_width, 'Mana', player.fighter.mana, player.fighter.max_mana,
+               libtcod.light_blue, libtcod.darker_blue)
     libtcod.console_print_ex(panel, 1, 3, libtcod.BKGND_NONE, libtcod.LEFT,
                              'Dungeon level: {0}'.format(game_map.dungeon_level))
+    libtcod.console_print_ex(panel, 1, 10, libtcod.BKGND_NONE, libtcod.LEFT,
+                             'Nutrition: {0}'.format(player.fighter.nutrition))
+    if player.fighter.stealthed == 1:
+        libtcod.console_print_ex(sidebar, 1, 20, libtcod.BKGND_NONE, libtcod.LEFT,
+                                 'Hiding in the Shadows'.format(player.fighter.stealthed))
+
 
     libtcod.console_set_default_foreground(panel, libtcod.light_gray)
     libtcod.console_print_ex(panel, 1, 0, libtcod.BKGND_NONE, libtcod.LEFT,
                              get_names_under_mouse(mouse, entities, fov_map))
 
     libtcod.console_blit(panel, 0, 0, screen_width, panel_height, 0, 0, panel_y)
+
+    libtcod.console_blit(sidebar, 0, 0, sidebar_width, screen_height, 0, 0, sidebar_x)
+
 
     if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY):
         if game_state == GameStates.SHOW_INVENTORY:
@@ -117,6 +128,9 @@ def render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, m
 
     elif game_state == GameStates.SKILL_SELECTION:
         job_selection_menu(con, 'You have gained a skill! Which button should it go in?:', player, 40, screen_width,screen_height)
+
+    elif game_state == GameStates.SHOW_SKILL_MENU:
+        skill_use_menu(con, 'What skill would you like to use?:', player, 40, screen_width,screen_height)
 
 
 def clear_all(con, entities):

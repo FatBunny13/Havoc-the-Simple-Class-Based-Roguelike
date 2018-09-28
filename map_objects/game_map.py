@@ -228,43 +228,41 @@ class GameMap:
                 monster_choice = random_choice_from_dict(monster_chances)
 
                 if monster_choice == 'orc':
-                    fighter_component = Fighter(hp=20, defense=4, power=6, xp=50, agility=3)
+                    fighter_component = Fighter(hp=20, defense=2, power=5, xp=5000, agility=1,mana = 0)
                     ai_component = BasicMonster()
 
                     monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', blocks=True,
                                      render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 elif monster_choice == 'troll':
-                    fighter_component = Fighter(hp=50, defense=7, power=16, xp=100, agility=1)
+                    fighter_component = Fighter(hp=50, defense=3, power=6, xp=100, agility=1,mana = 0)
                     ai_component = BasicMonster()
 
                     monster = Entity(x, y, 'T', libtcod.darker_green, 'Cave Troll', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
                 elif monster_choice == 'stone':
-                    fighter_component = Fighter(hp=10, defense=25, power=8, xp=160, agility= -4)
+                    fighter_component = Fighter(hp=10, defense=25, power=8, xp=160, agility= -1,mana = 0)
                     ai_component = BasicMonster()
 
                     monster = Entity(x, y, 'G', libtcod.gray, 'Stone Golem', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
                 elif monster_choice == 'slime':
-                    fighter_component = Fighter(hp=10, defense=25, power=8, xp=160, agility= -4)
+                    fighter_component = Fighter(hp=10, defense=25, power=8, xp=160, agility= 2,mana = 0)
                     ai_component = SlimeMonster()
 
                     monster = Entity(x, y, 's', libtcod.green, 'Slime', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
                 elif monster_choice == 'shrub':
-                    fighter_component = Fighter(hp=1, defense=0, power=8, xp=160, agility= 14)
+                    fighter_component = Fighter(hp=1, defense=0, power=5, xp=160, agility= 3,mana = 0)
                     ai_component = ShrubMonster()
 
                     monster = Entity(x, y, '"', libtcod.desaturated_green, 'Thorn-Shrub', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
                 else:
-                    fighter_component = Fighter(hp=10, defense=1, power=3, xp=100, agility=20)
+                    fighter_component = Fighter(hp=10, defense=1, power=2, xp=100, agility=4,mana = 0)
                     ai_component = BasicMonster()
 
                     monster = Entity(x, y, 'f', libtcod.black, 'Fairy', blocks=True,fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
-
-                entities.append(monster)
 
 
                 entities.append(monster)
@@ -281,21 +279,26 @@ class GameMap:
                     item = Entity(x, y, '!', libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM,
                                   item=item_component)
                 elif item_choice == 'sword':
+                    item_component = Item(use_function=None)
                     equippable_component = Equippable(EquipmentSlots.MAIN_HAND and EquipmentSlots.OFF_HAND, power_bonus=3)
-                    item = Entity(x, y, '/', libtcod.white, 'Sword', equippable=equippable_component)
+                    item = Entity(x, y, '/', libtcod.white, 'Sword', equippable=equippable_component,item=item_component)
                 elif item_choice == 'lance':
                     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=6, defense_bonus=-5)
-                    item = Entity(x, y, '/', libtcod.white, 'Lance', equippable=equippable_component)
+                    item_component = Item(use_function=None)
+                    item = Entity(x, y, '/', libtcod.white, 'Lance', equippable=equippable_component,item=item_component)
                 elif item_choice == 'shield':
+                    item_component = Item(use_function=None)
                     equippable_component = Equippable(EquipmentSlots.OFF_HAND, defense_bonus=4, agility_bonus =-3)
-                    item = Entity(x, y, '[', libtcod.darker_orange, 'Shield', equippable=equippable_component)
+                    item = Entity(x, y, '[', libtcod.darker_orange, 'Shield', equippable=equippable_component,item=item_component)
                 elif item_choice == 'rbrace':
+                    item_component = Item(use_function=None)
                     equippable_component = Equippable(EquipmentSlots.RIGHT_BRACELET, defense_bonus=4, agility_bonus =-3)
-                    item = Entity(x, y, '[', libtcod.black, 'Right Bracelet of Defense', equippable=equippable_component)
+                    item = Entity(x, y, '[', libtcod.black, 'Right Bracelet of Defense', equippable=equippable_component,item=item_component)
                 elif item_choice == 'rlightbrace':
-                    equippable_component = Equippable(EquipmentSlots.RIGHT_BRACELET, defense_bonus=1, agility_bonus=-1)
+                    item_component = Item(use_function=None)
+                    equippable_component = Equippable(EquipmentSlots.RIGHT_BRACELET, defense_bonus=1, agility_bonus=-1,)
                     item = Entity(x, y, '[', libtcod.black, 'Rotten Right Bracelet',
-                                  equippable=equippable_component)
+                                  equippable=equippable_component,item=item_component)
                 elif item_choice == 'fireball_scroll':
                     item_component = Item(use_function=cast_fireball, targeting=True, targeting_message=Message(
                         'Left-click a target tile for the fireball, or right-click to cancel.', libtcod.light_cyan),

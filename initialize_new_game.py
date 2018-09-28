@@ -1,11 +1,15 @@
 import libtcodpy as libtcod
-import input_handlers
+import random
 
 from components.equipment import Equipment
 from components.equippable import Equippable
+from components.item import Item
 from fighter import Fighter
 from components.inventory import Inventory
 from components.level import Level
+from components.skills import Skills
+from components.skill import Skill
+
 
 from entity import Entity
 
@@ -17,6 +21,11 @@ from game_states import GameStates
 
 from map_objects.game_map import GameMap
 from character import Gender
+
+
+from item_functions import prayer, cast_tornado, heal, cast_lightning
+
+
 
 from render_functions import RenderOrder
 
@@ -35,7 +44,7 @@ def get_constants():
     message_width = screen_width - bar_width - 2
     message_height = panel_height - 1
 
-    map_width = 80
+    map_width = 78
     map_height = 43
 
     room_max_size = 10
@@ -71,6 +80,8 @@ def get_constants():
         'bar_width': bar_width,
         'panel_height': panel_height,
         'panel_y': panel_y,
+        'sidebar_width': sidebar_width,
+        'sidebar_x': sidebar_x,
         'message_x': message_x,
         'message_width': message_width,
         'message_height': message_height,
@@ -96,24 +107,26 @@ def get_constants():
 
 
 def get_game_variables(constants):
-    fighter_component = Fighter(hp=100, defense=1, power=4, agility=4)
+    fighter_component = Fighter(hp=100, defense=1, power=5, agility=1, job = 0, mana = 10, nutrition=500)
     inventory_component = Inventory(26)
+    skills_component = Skills(15)
     level_component = Level()
     equipment_component = Equipment()
     player = Entity(0, 0, '@', libtcod.white, 'Player', blocks=True, render_order=RenderOrder.ACTOR,
                     fighter=fighter_component, inventory=inventory_component, level=level_component,
-                    equipment=equipment_component)
+                    equipment=equipment_component, skills=skills_component)
     entities = [player]
 
     equippable_component = Equippable(EquipmentSlots.MAIN_HAND, power_bonus=4)
-    dagger = Entity(0, 0, '/', libtcod.sky, 'Carving Knife', equippable=equippable_component)
+    item_component = Item(use_function=None)
+    dagger = Entity(0, 0, '/', libtcod.sky, 'Carving Knife', equippable=equippable_component,item=item_component)
     equippable_component = Equippable(EquipmentSlots.OFF_HAND, defense_bonus=1, agility_bonus=-1)
-    buckler = Entity(0, 0, '{', libtcod.sky, 'Buckler', equippable=equippable_component)
+    item_component = Item(use_function=None)
+    buckler = Entity(0, 0, '{', libtcod.sky, 'Buckler', equippable=equippable_component,item=item_component)
     player.inventory.add_item(dagger)
     player.equipment.toggle_equip(dagger)
     player.inventory.add_item(buckler)
     player.equipment.toggle_equip(buckler)
-
     game_map = GameMap(constants['map_width'], constants['map_height'])
     game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
                       constants['max_maze_rooms'], constants['maze_min_size'], constants['maze_max_size'],

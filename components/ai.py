@@ -13,11 +13,20 @@ class BasicMonster:
         if libtcod.map_is_in_fov(fov_map, monster.x, monster.y):
 
             if monster.distance_to(target) >= 2:
-                monster.move_astar(target, entities, game_map)
+                if target.fighter.stealthed == 0:
+                    monster.move_astar(target, entities, game_map)
+                else:
+                   pass
 
             elif target.fighter.hp > 0:
                 attack_results = monster.fighter.attack(target)
                 results.extend(attack_results)
+        else:
+            random_x = self.owner.x + randint(0, 2) - 1
+            random_y = self.owner.y + randint(0, 2) - 1
+
+            if random_x != self.owner.x and random_y != self.owner.y:
+                self.owner.move_towards(random_x, random_y, game_map, entities)
 
         return results
 

@@ -28,6 +28,8 @@ def handle_keys(key, game_state):
         return handle_job_selection(key)
     elif game_state == GameStates.SKILL_SELECTION:
         return handle_job_selection(key)
+    elif game_state == GameStates.SHOW_SKILL_MENU:
+        return handle_skill_keys(key)
 
     return {}
 
@@ -57,6 +59,8 @@ def handle_player_turn_keys(key):
 
     if key_char == 'g':
         return {'pickup': True}
+    if key_char == 's':
+        return {'use_skills': True}
 
     elif key_char == 'i':
         return {'show_inventory': True}
@@ -96,6 +100,8 @@ def handle_player_dead_keys(key):
 
     if key_char == 'i':
         return {'show_inventory': True}
+    if key_char == 's':
+        return {'use_skills': True}
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
         return {'fullscreen': True}
@@ -149,19 +155,33 @@ def handle_level_up_menu(key):
 
     return {}
 
-def handle_skill_selection(key):
-    if key:
-        key_char = chr(key.c)
+def handle_inventory_keys(key):
+    index = key.c - ord('a')
 
-        if key_char == 'a' and player.fighter.thief_level == 2:
-            return {'skill_selection': 'hp'}
-        elif key_char == 'b':
-            return {'skill_selection': 'str'}
-        elif key_char == 'c':
-            return {'skill_selection': 'def'}
-        elif key_char == 'd':
-            return {'skill_selection': 'agi'}
+    if index >= 0:
+        return {'inventory_index': index}
 
+    if key.vk == libtcod.KEY_ENTER and key.lalt:
+        # Alt+Enter: toggle full screen
+        return {'fullscreen': True}
+    elif key.vk == libtcod.KEY_ESCAPE:
+        # Exit the menu
+        return {'exit': True}
+
+    return {}
+
+def handle_skill_keys(key):
+    index = key.c - ord('a')
+
+    if index >= 0:
+        return {'skill_index': index}
+
+    if key.vk == libtcod.KEY_ENTER and key.lalt:
+        # Alt+Enter: toggle full screen
+        return {'fullscreen': True}
+    elif key.vk == libtcod.KEY_ESCAPE:
+        # Exit the menu
+        return {'exit': True}
 
     return {}
 

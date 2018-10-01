@@ -2,7 +2,6 @@ import libtcodpy as libtcod
 
 
 from game_states import GameStates
-from fighter import Fighter
 
 def handle_keys(key, game_state):
 
@@ -28,8 +27,6 @@ def handle_keys(key, game_state):
         return handle_job_selection(key)
     elif game_state == GameStates.SKILL_SELECTION:
         return handle_job_selection(key)
-    elif game_state == GameStates.SHOW_SKILL_MENU:
-        return handle_skill_keys(key)
 
     return {}
 
@@ -59,8 +56,6 @@ def handle_player_turn_keys(key):
 
     if key_char == 'g':
         return {'pickup': True}
-    if key_char == 's':
-        return {'use_skills': True}
 
     elif key_char == 'i':
         return {'show_inventory': True}
@@ -76,6 +71,9 @@ def handle_player_turn_keys(key):
 
     elif key_char == 'c':
         return {'show_character_screen': True}
+
+    elif key_char == 's':
+        return {'skill_selection': True}
 
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
@@ -100,8 +98,8 @@ def handle_player_dead_keys(key):
 
     if key_char == 'i':
         return {'show_inventory': True}
-    if key_char == 's':
-        return {'use_skills': True}
+    elif key_char == 's':
+        return {'skill_selection': True}
     if key.vk == libtcod.KEY_ENTER and key.lalt:
         # Alt+Enter: toggle full screen
         return {'fullscreen': True}
@@ -155,22 +153,7 @@ def handle_level_up_menu(key):
 
     return {}
 
-def handle_inventory_keys(key):
-    index = key.c - ord('a')
-
-    if index >= 0:
-        return {'inventory_index': index}
-
-    if key.vk == libtcod.KEY_ENTER and key.lalt:
-        # Alt+Enter: toggle full screen
-        return {'fullscreen': True}
-    elif key.vk == libtcod.KEY_ESCAPE:
-        # Exit the menu
-        return {'exit': True}
-
-    return {}
-
-def handle_skill_keys(key):
+def handle_skill_selection(key, player):
     index = key.c - ord('a')
 
     if index >= 0:
@@ -210,7 +193,7 @@ def handle_job_selection(key):
     if key:
         key_char = chr(key.c)
 
-        if key_char == 'a':
+        if key_char  == 'a':
             return {'job': 'pri'}
         elif key_char == 'b':
             return {'job': 'fig'}

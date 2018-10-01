@@ -11,13 +11,8 @@ from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
 from render_functions import clear_all, render_all
 from character import Gender
-from item_functions import prayer, cast_tornado, heal, cast_lightning, hide
-from components.skills import Skills
-from components.skill import Skill
-from entity import Entity
 
-
-def play_game(player, entities, game_map, message_log,game_state, con, panel, constants):
+def play_game(player, entities, game_map, message_log, con, panel, constants):
     fov_recompute = True
 
     fov_map = initialize_fov(game_map)
@@ -43,7 +38,7 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
 
         render_all(con, panel, entities, player, game_map, fov_map, fov_recompute, message_log,
                    constants['screen_width'], constants['screen_height'], constants['bar_width'],
-                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'],game_state)
+                   constants['panel_height'], constants['panel_y'], mouse, constants['colors'], game_state)
 
         fov_recompute = False
 
@@ -57,7 +52,6 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
         move = action.get('move')
         wait = action.get('wait')
         pickup = action.get('pickup')
-        use_skills = action.get('use_skills')
         show_inventory = action.get('show_inventory')
         drop_inventory = action.get('drop_inventory')
         inventory_index = action.get('inventory_index')
@@ -79,13 +73,9 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
         player_turn_results = []
 
         if move and game_state == GameStates.PLAYERS_TURN:
-            player.fighter.nutrition -= 1
             dx, dy = move
             destination_x = player.x + dx
             destination_y = player.y + dy
-
-            if player.fighter.nutrition == 0:
-                kill_player()
 
             if not game_map.is_blocked(destination_x, destination_y):
                 target = get_blocking_entities_at_location(entities, destination_x, destination_y)
@@ -128,12 +118,6 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
             libtcod.console_flush()
             libtcod.console_clear(con)
 
-        if use_skills:
-            previous_game_state = game_state
-            game_state = GameStates.SHOW_SKILL_MENU
-            libtcod.console_flush()
-            libtcod.console_clear(con)
-
         if drop_inventory:
             previous_game_state = game_state
             game_state = GameStates.DROP_INVENTORY
@@ -143,6 +127,7 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
         if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(
                 player.inventory.items):
             item = player.inventory.items[inventory_index]
+            equippable = player.inventory.items[inventory_index]
 
             if game_state == GameStates.SHOW_INVENTORY:
                 player_turn_results.extend(player.inventory.use(item, entities=entities, fov_map=fov_map))
@@ -154,13 +139,16 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 libtcod.console_clear(con)
 
         if skill_index is not None and previous_game_state != GameStates.PLAYER_DEAD and skill_index < len(
-                player.skills.number_of_skills):
-            skill = player.skills.number_of_skills[skill_index]
+                player.skills.skill):
+            skill = player.skills.skill[skill_index]
+            skills = player.skills.skill[skill_index]
+            player_turn_results.extend(player.skills.use(skill))
 
-            if game_state == GameStates.SHOW_SKILL_MENU:
+            if game_state == GameStates.SKILL_SELECTION:
                 player_turn_results.extend(player.skills.use(skill, entities=entities, fov_map=fov_map))
                 libtcod.console_flush()
                 libtcod.console_clear(con)
+
 
         if take_stairs and game_state == GameStates.PLAYERS_TURN:
             for entity in entities:
@@ -186,41 +174,24 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 message_log.add_message(Message('There are no stairs here.', libtcod.yellow))
 
         if level_up:
-            if level_up == 'hp':
-                player.fighter.base_max_hp += 10
-                player.fighter.hp += 10
-            elif level_up == 'str':
-                player.fighter.base_power += 1
-            elif level_up == 'def':
-                player.fighter.base_defense += 1
-            libtcod.console_flush()
-            libtcod.console_clear(con)
             game_state = GameStates.JOB_SELECTION
 
-#For some reason the skil menu is linked here. I wonder why?
         if job:
             if job == 'pri':
                 player.fighter.base_max_hp += 20
                 player.fighter.hp += 20
                 player.fighter.job += 1
                 player.fighter.priest_level += 1
-                skill_component = Skill(use_function=prayer, amount=40, mana_cost=5)
-                bandage = Entity(0, 0, '?', libtcod.yellow, 'Cure Light Wounds', skill=skill_component)
-                player.skills.add_skill(bandage)
             elif job == 'fig':
-                player.fighter.base_power += 2
+                player.fighter.base_power += 3
                 player.fighter.base_defense += 1
                 player.fighter.job += 2
                 player.fighter.fighter_level += 1
             elif job == 'thi':
-                skill_component = Skill(use_function=hide)
-                tornado = Entity(0, 0, '?', libtcod.yellow, 'Hide', skill=skill_component)
                 player.fighter.base_defense += 2
                 player.fighter.base_power += 1
-                player.fighter.base_agility += 0.5
                 player.fighter.job += 3
                 player.fighter.thief_level += 1
-                player.skills.add_skill(tornado)
             libtcod.console_flush()
             libtcod.console_clear(con)
             game_state = GameStates.PLAYERS_TURN
@@ -231,14 +202,14 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 player.fighter.hp += 20
                 player.fighter.race += 1
             elif character_creation == 'avis':
-                player.fighter.base_power += 1
+                player.fighter.base_power += 2
                 player.fighter.race += 2
             elif character_creation == 'lepra':
-                player.fighter.base_defense += 1
+                player.fighter.base_defense += 3
                 player.fighter.race += 3
             elif character_creation == 'giant':
-                player.fighter.base_agility -= 5
-                player.fighter.base_power += 6
+                player.fighter.base_agility -= 3
+                player.fighter.base_power += 3
                 player.fighter.hp += 60
                 player.fighter.base_max_hp += 60
                 player.fighter.race += 4
@@ -246,13 +217,18 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 player.fighter.base_agility += 2
                 player.fighter.race += 5
             elif character_creation == 'fae':
-                player.fighter.base_agility += 10
-                player.fighter.hp -= 75
-                player.fighter.base_max_hp -= 75
+                player.fighter.base_agility += 5
+                player.fighter.hp -= 50
+                player.fighter.base_max_hp -= 50
                 player.fighter.race += 6
             libtcod.console_flush()
             libtcod.console_clear(con)
             game_state = GameStates.GENDER_SELECTION
+
+        if skill_selection:
+            previous_game_state = game_state
+            game_state = GameStates.SKILL_SELECTION
+            libtcod.console_flush()
         # damn son thats a lot of menus
         # like a lot
 
@@ -263,13 +239,12 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                     player.fighter.gender += 1
                     ggender == Gender.male
                 elif gender == 'f':
-                    player.fighter.base_power += 5
-                    player.fighter.base_max_hp -= 20
-                    player.fighter.hp -= 20
+                    player.fighter.base_power += 1
+                    player.fighter.base_max_hp -= 5
+                    player.fighter.hp -= 5
                     player.fighter.gender += 2
                     ggender == Gender.female
                 elif gender == 'a':
-                    player.fighter.base_defense += 1
                     player.fighter.gender += 3
                     ggender == Gender.agender
                 libtcod.console_flush()
@@ -295,12 +270,8 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 libtcod.console_clear(con)
 
         if exit:
-            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
+            if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN, GameStates.SKILL_SELECTION):
                 game_state = previous_game_state
-                libtcod.console_flush()
-                libtcod.console_clear(con)
-            elif game_state == GameStates.SHOW_SKILL_MENU:
-                game_state = GameStates.PLAYERS_TURN
                 libtcod.console_flush()
                 libtcod.console_clear(con)
             elif game_state == GameStates.TARGETING:
@@ -321,14 +292,13 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
             message = player_turn_result.get('message')
             dead_entity = player_turn_result.get('dead')
             item_added = player_turn_result.get('item_added')
-            skill_added = player_turn_result.get('skill_added')
             item_consumed = player_turn_result.get('consumed')
             item_dropped = player_turn_result.get('item_dropped')
             equip = player_turn_result.get('equip')
             targeting = player_turn_result.get('targeting')
             targeting_cancelled = player_turn_result.get('targeting_cancelled')
             xp = player_turn_result.get('xp')
-            skill_used = player_turn_result.get('used')
+            skill_used = player_turn_result.get('skill_used')
 
             if message:
                 message_log.add_message(message)
@@ -347,12 +317,6 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 game_state = GameStates.ENEMY_TURN
 
             if item_consumed:
-                game_state = GameStates.ENEMY_TURN
-
-            if skill_added:
-                game_state = GameStates.ENEMY_TURN
-
-            if skill_used:
                 game_state = GameStates.ENEMY_TURN
 
             if item_dropped:
@@ -395,19 +359,12 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 if leveled_up:
 
                     previous_game_state = game_state
-                    game_state = GameStates.LEVEL_UP
+                    game_state = GameStates.JOB_SELECTION
 
+            if skill_used:
+                game_state = GameStates.ENEMY_TURN
 
         if game_state == GameStates.ENEMY_TURN:
-
-            player.fighter.nutrition -= 1
-
-            if player.fighter.nutrition <= 100 and player.fighter.stealthed == 1:
-                player.fighter.stealthed -= 1
-
-            if player.fighter.nutrition <= 0:
-                kill_player(player)
-                Message('You died!', libtcod.red)
 
             for entity in entities:
                 if entity.ai:
@@ -505,7 +462,7 @@ def main():
         else:
             libtcod.console_flush()
             libtcod.console_clear(con)
-            play_game(player, entities, game_map, message_log, game_state, con,panel, constants)
+            play_game(player, entities, game_map, message_log, game_state, con, constants)
             show_main_menu = True
 
 

@@ -60,16 +60,16 @@ class Entity:
         if self.upstairs:
             self.upstairs.owner = self
 
+        if self.skill:
+            self.item.skill = self
+
+        if self.skills:
+            self.skills.owner = self
+
             if not self.item:
                 item = Item()
                 self.item = item
                 self.item.owner = self
-
-        if self.skill:
-            self.skill.owner = self
-
-        if self.skills:
-            self.skills.owner = self
 
     def move(self, dx, dy):
         # Move the entity by a given amount

@@ -14,4 +14,4 @@ class GameStates(Enum):
     GENDER_SELECTION = 10
     JOB_SELECTION = 11
     SKILL_SELECTION = 12
-    SHOW_SKILL_MENU = 13
+    SKILL_MENU = 13

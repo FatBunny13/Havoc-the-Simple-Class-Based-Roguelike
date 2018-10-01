@@ -31,6 +31,24 @@ class Equipment:
         return bonus
 
     @property
+    def psyche_bonus(self):
+        bonus = 0
+
+        if self.main_hand and self.main_hand.equippable:
+            bonus += self.main_hand.equippable.psyche_bonus
+
+        if self.off_hand and self.off_hand.equippable:
+            bonus += self.off_hand.equippable.psyche_bonus
+
+        if self.right_bracelet and self.right_bracelet.equippable:
+            bonus += self.right_bracelet.equippable.psyche_bonus
+
+        if self.left_bracelet and self.left_bracelet.equippable:
+            bonus += self.left_bracelet.equippable.psyche_bonus
+
+        return bonus
+
+    @property
     def max_mana_bonus(self):
         bonus = 0
 

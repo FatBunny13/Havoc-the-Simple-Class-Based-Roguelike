@@ -1,7 +1,7 @@
 import libtcodpy as libtcod
 from random import randint
 
-from components.ai import BasicMonster, SlimeMonster, ShrubMonster
+from components.ai import BasicMonster, SlimeMonster, ShrubMonster,CharmedMonster
 from components.equipment import EquipmentSlots, Equipment
 from components.equippable import Equippable
 from fighter import Fighter
@@ -13,7 +13,7 @@ from entity import Entity
 
 from game_messages import Message
 
-from item_functions import cast_confuse, cast_fireball, cast_lightning, heal, throw_shurikin
+from item_functions import cast_confuse, cast_fireball, cast_lightning, heal, throw_shurikin, eat
 
 from map_objects.rectangle import Rect
 from map_objects.tile import Tile
@@ -166,9 +166,9 @@ class GameMap:
         entities.append(down_stairs)
 
         upstairs_component = Upstairs(self.dungeon_level + 1)
-        down_stairs = Entity(player.x, player.y, '<', libtcod.white, 'Stairs',
+        up_stairs = Entity(player.x, player.y, '<', libtcod.white, 'Stairs',
                              render_order=RenderOrder.UPSTAIRS, stairs=upstairs_component)
-        entities.append(down_stairs)
+        entities.append(up_stairs)
 
     def create_room(self, room):
         # go through the tiles in the rectangle and make them passable
@@ -209,6 +209,7 @@ class GameMap:
 
         item_chances = {
             'healing_potion': 35,
+            'ration': 10,
             'sword': from_dungeon_level([[10, 1]], self.dungeon_level),
             'shield': from_dungeon_level([[15, 8]], self.dungeon_level),
             'lance': from_dungeon_level([[15, 3]], self.dungeon_level),
@@ -228,37 +229,37 @@ class GameMap:
                 monster_choice = random_choice_from_dict(monster_chances)
 
                 if monster_choice == 'orc':
-                    fighter_component = Fighter(hp=20, defense=2, power=5, xp=5000, agility=1,mana = 0)
-                    ai_component = BasicMonster()
+                    fighter_component = Fighter(hp=20, defense=2, power=5, xp=5000, agility=1,mana = 0,base_psyche = 0)
+                    ai_component = CharmedMonster()
 
                     monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', blocks=True,
                                      render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)
                 elif monster_choice == 'troll':
-                    fighter_component = Fighter(hp=50, defense=3, power=6, xp=100, agility=1,mana = 0)
+                    fighter_component = Fighter(hp=50, defense=3, power=6, xp=100, agility=1,mana = 0,base_psyche = 0)
                     ai_component = BasicMonster()
 
                     monster = Entity(x, y, 'T', libtcod.darker_green, 'Cave Troll', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
                 elif monster_choice == 'stone':
-                    fighter_component = Fighter(hp=10, defense=25, power=8, xp=160, agility= -1,mana = 0)
+                    fighter_component = Fighter(hp=10, defense=25, power=8, xp=160, agility= -1,mana = 0,base_psyche = 0)
                     ai_component = BasicMonster()
 
                     monster = Entity(x, y, 'G', libtcod.gray, 'Stone Golem', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
                 elif monster_choice == 'slime':
-                    fighter_component = Fighter(hp=10, defense=25, power=8, xp=160, agility= 2,mana = 0)
+                    fighter_component = Fighter(hp=10, defense=25, power=8, xp=160, agility= 2,mana = 0,base_psyche = 0)
                     ai_component = SlimeMonster()
 
                     monster = Entity(x, y, 's', libtcod.green, 'Slime', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
                 elif monster_choice == 'shrub':
-                    fighter_component = Fighter(hp=1, defense=0, power=5, xp=160, agility= 3,mana = 0)
+                    fighter_component = Fighter(hp=1, defense=0, power=5, xp=160, agility= 3,mana = 0,base_psyche = 0)
                     ai_component = ShrubMonster()
 
                     monster = Entity(x, y, '"', libtcod.desaturated_green, 'Thorn-Shrub', blocks=True, fighter=fighter_component,
                                      render_order=RenderOrder.ACTOR, ai=ai_component)
                 else:
-                    fighter_component = Fighter(hp=10, defense=1, power=2, xp=100, agility=4,mana = 0)
+                    fighter_component = Fighter(hp=10, defense=1, power=2, xp=100, agility=4,mana = 0,base_psyche = 0)
                     ai_component = BasicMonster()
 
                     monster = Entity(x, y, 'f', libtcod.black, 'Fairy', blocks=True,fighter=fighter_component,
@@ -278,6 +279,10 @@ class GameMap:
                     item_component = Item(use_function=heal, amount=40)
                     item = Entity(x, y, '!', libtcod.violet, 'Healing Potion', render_order=RenderOrder.ITEM,
                                   item=item_component)
+                elif item_choice == 'ration':
+                    item_component = Item(use_function=eat, amount=40)
+                    item = Entity(x, y, '%', libtcod.brown, 'Ration', render_order=RenderOrder.ITEM,
+                              item=item_component)
                 elif item_choice == 'sword':
                     item_component = Item(use_function=None)
                     equippable_component = Equippable(EquipmentSlots.MAIN_HAND and EquipmentSlots.OFF_HAND, power_bonus=3)

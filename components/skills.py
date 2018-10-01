@@ -33,14 +33,17 @@ class Skills:
         if skill_component.use_function is None:
             results.append({'message': Message('You cannot use that skill.'.format(skill_entity.name), libtcod.yellow)})
         else:
-            kwargs = {**skill_component.function_kwargs, **kwargs}
-            skill_use_results = skill_component.use_function(self.owner, **kwargs)
+            if skill_component.skill_targeting and not (kwargs.get('target_x') or kwargs.get('target_y')):
+                results.append({'skill_targeting': skill_entity})
+            else:
+                kwargs = {**skill_component.function_kwargs, **kwargs}
+                skill_use_results = skill_component.use_function(self.owner, **kwargs)
 
-            for skill_use_result in skill_use_results:
-                if skill_use_result.get('used'):
-                    self.remove_skill(skill_entity)
+                for skill_use_result in skill_use_results:
+                    if skill_use_result.get('used'):
+                       self.remove_skill(skill_entity)
 
-            results.extend(skill_use_results)
+                    results.extend(skill_use_results)
 
         return results
 

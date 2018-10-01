@@ -16,8 +16,11 @@ class BasicMonster:
                 if target.fighter.stealthed == 0:
                     monster.move_astar(target, entities, game_map)
                 else:
-                   pass
+                    random_x = self.owner.x + randint(0, 2) - 1
+                    random_y = self.owner.y + randint(0, 2) - 1
 
+                    if random_x != self.owner.x and random_y != self.owner.y:
+                        self.owner.move_towards(random_x, random_y, game_map, entities)
             elif target.fighter.hp > 0:
                 attack_results = monster.fighter.attack(target)
                 results.extend(attack_results)
@@ -29,6 +32,40 @@ class BasicMonster:
                 self.owner.move_towards(random_x, random_y, game_map, entities)
 
         return results
+
+class CharmedMonster:
+    def take_turn(self, target, fov_map, game_map, entities):
+        results = []
+
+        monster = self.owner
+        closest_distance = 10
+        for entity in entities:
+            if entity.ai and entity != monster and libtcod.map_is_in_fov(fov_map, entity.x, entity.y):
+                distance = monster.distance_to(entity)
+
+                if distance < closest_distance:
+                    target = entity
+                    closest_distance = distance
+                    if monster.distance_to(target) >= 2:
+                            monster.move_astar(target, entities, game_map)
+                    elif target.fighter.hp > 0:
+                        attack_results = monster.fighter.attack(target)
+                        results.extend(attack_results)
+                else:
+                    random_x = self.owner.x + randint(0, 2) - 1
+                    random_y = self.owner.y + randint(0, 2) - 1
+
+                    if random_x != self.owner.x and random_y != self.owner.y:
+                        self.owner.move_towards(random_x, random_y, game_map, entities)
+        else:
+            random_x = self.owner.x + randint(0, 2) - 1
+            random_y = self.owner.y + randint(0, 2) - 1
+
+            if random_x != self.owner.x and random_y != self.owner.y:
+                self.owner.move_towards(random_x, random_y, game_map, entities)
+
+        return results
+
 
 
 class ConfusedMonster:

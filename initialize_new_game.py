@@ -1,4 +1,5 @@
 import libtcodpy as libtcod
+import random
 
 from components.equipment import Equipment
 from components.equippable import Equippable
@@ -7,6 +8,8 @@ from fighter import Fighter
 from components.inventory import Inventory
 from components.level import Level
 from components.skills import Skills
+from components.skill import Skill
+
 
 from entity import Entity
 
@@ -18,6 +21,9 @@ from game_states import GameStates
 
 from map_objects.game_map import GameMap
 from character import Gender
+
+
+
 
 from render_functions import RenderOrder
 
@@ -36,7 +42,7 @@ def get_constants():
     message_width = screen_width - bar_width - 2
     message_height = panel_height - 1
 
-    map_width = 80
+    map_width = 78
     map_height = 43
 
     room_max_size = 10
@@ -97,7 +103,7 @@ def get_constants():
 
 
 def get_game_variables(constants):
-    fighter_component = Fighter(hp=100, defense=1, power=5, agility=1, job = 0)
+    fighter_component = Fighter(hp=100, defense=1, power=5, agility=1, job = 0, mana = 10, nutrition=500, base_psyche = 2, starvation_bonus = 0)
     inventory_component = Inventory(26)
     skills_component = Skills(15)
     level_component = Level()
@@ -117,7 +123,6 @@ def get_game_variables(constants):
     player.equipment.toggle_equip(dagger)
     player.inventory.add_item(buckler)
     player.equipment.toggle_equip(buckler)
-
     game_map = GameMap(constants['map_width'], constants['map_height'])
     game_map.make_map(constants['max_rooms'], constants['room_min_size'], constants['room_max_size'],
                       constants['max_maze_rooms'], constants['maze_min_size'], constants['maze_max_size'],

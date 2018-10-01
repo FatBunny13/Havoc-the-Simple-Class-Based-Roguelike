@@ -48,6 +48,18 @@ def inventory_menu(con, header, player, inventory_width, screen_width, screen_he
 
     menu(con, header, options, inventory_width, screen_width, screen_height)
 
+def skill_use_menu(con, header, player, inventory_width, screen_width, screen_height):
+    # show a menu with each item of the inventory as an option
+    if len(player.skills.number_of_skills) == 0:
+        options = ['You have no skills.']
+    else:
+        options = [skill.name for skill in player.skills.number_of_skills]
+
+
+
+
+    menu(con, header, options, inventory_width, screen_width, screen_height)
+
 
 def main_menu(con, background_image, screen_width, screen_height):
     libtcod.image_blit_2x(background_image, 0, 0, 0)
@@ -86,9 +98,17 @@ def character_creation_menu(con, header, player, menu_width, screen_width, scree
     		   'Leprachaun'.format(player.fighter.max_hp),
     		   'Giant'.format(player.fighter.max_hp),
     		   'Changeling'.format(player.fighter.max_hp),
-    'Dark Fae'.format(player.fighter.max_hp)]
+    'Nymph'.format(player.fighter.max_hp)]
 
 
+
+    menu(con, header, options, menu_width, screen_width, screen_height)
+
+
+def level_up_menu(con, header, player, menu_width, screen_width, screen_height):
+    options = ['Constitution (+20 HP, from {0})'.format(player.fighter.max_hp),
+               'Strength (+1 attack, from {0})'.format(player.fighter.power),
+               'Defense (+1 defense, from {0})'.format(player.fighter.defense)]
 
     menu(con, header, options, menu_width, screen_width, screen_height)
 
@@ -101,22 +121,17 @@ def gender_selection_menu(con, header, player, menu_width, screen_width, screen_
 
 
 def job_selection_menu(con, header, player, menu_width, screen_width, screen_height):
+
     options = ['Priest'.format(player.fighter.max_hp),
                'Fighter '.format(player.fighter.max_hp),
-               'Thief'.format(player.fighter.max_hp),]
+               'Thief'.format(player.fighter.max_hp),
+               'Magician'.format(player.fighter.max_hp),]
+
+    if player.fighter.thief_level >= 1:
+        options.append('Psychic')
+
 
     menu(con, header, options, menu_width, screen_width, screen_height)
-
-
-def skill_selection_menu(player, character_screen_width, skills, skill, character_screen_height, screen_width, screen_height):
-    # show a menu with each item of the inventory as an option
-    if len(player.skills.skill) == 0:
-        options = ['You have no skills.']
-    else:
-        options = [skill.name for player.fighter.skills in skills.skill]
-
-    menu(options, screen_width, screen_height)
-
 
 def character_screen(player, character_screen_width, character_screen_height, screen_width, screen_height):
     window = libtcod.console_new(character_screen_width, character_screen_height)
@@ -145,15 +160,6 @@ def character_screen(player, character_screen_width, character_screen_height, sc
     x = screen_width // 2 - character_screen_width // 2
     y = screen_height // 2 - character_screen_height // 2
     libtcod.console_blit(window, 0, 0, character_screen_width, character_screen_height, 0, x, y, 1.0, 0.7)
-
-def skill_screen(player, character_screen_width,skills,skill,character_screen_height, screen_width, screen_height):
-        # show a menu with each item of the inventory as an option
-        if len(player.skills.skill) == 0:
-            options = ['You have no skills.']
-        else:
-            options = [skill.name for player.fighter.skills in skills.skill]
-
-        menu( options, screen_width, screen_height)
 
 
 def message_box(con, header, width, screen_width, screen_height):

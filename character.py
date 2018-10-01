@@ -6,6 +6,6 @@ agender = 3
 
 
 class Gender(Enum):
-    male = male
-    female = female
-    agender = agender
+    male = "male"
+    female = "female"
+    agender = "agender"

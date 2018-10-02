@@ -11,7 +11,7 @@ from loader_functions.data_loaders import load_game, save_game
 from menus import main_menu, message_box
 from render_functions import clear_all, render_all
 from character import Gender
-from item_functions import prayer, cast_tornado, heal, cast_lightning,cast_mind_lightning, hide, cast_spell_fireball
+from item_functions import prayer, cast_tornado, heal, cast_lightning,cast_mind_lightning, hide, cast_spell_fireball,cast_charm
 from components.skills import Skills
 from components.skill import Skill
 from entity import Entity
@@ -81,12 +81,19 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
 
 
         if move and game_state == GameStates.PLAYERS_TURN:
+            libtcod.console_flush()
             starvation_variable = 1
             player.fighter.nutrition -= 1
             dx, dy = move
             destination_x = player.x + dx
             destination_y = player.y + dy
 
+            if player.fighter.job == 5:
+                skill_component = Skill(use_function=cast_charm, targeting=True, targeting_message=Message(
+                    'Left-click an enemy to charm it, or right-click to cancel.', libtcod.light_cyan))
+                charm = Entity(player.x, player.y, ' ', libtcod.light_pink, 'Charm Enemy',
+                              skill=skill_component)
+                player.skills.add_skill(charm)
 
             if player.fighter.nutrition <= 0:
                 kill_player(player)
@@ -142,20 +149,14 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
         if show_inventory:
             previous_game_state = game_state
             game_state = GameStates.SHOW_INVENTORY
-            libtcod.console_flush()
-            libtcod.console_clear(con)
 
         if use_skills:
             previous_game_state = game_state
             game_state = GameStates.SHOW_SKILL_MENU
-            libtcod.console_flush()
-            libtcod.console_clear(con)
 
         if drop_inventory:
             previous_game_state = game_state
             game_state = GameStates.DROP_INVENTORY
-            libtcod.console_flush()
-            libtcod.console_clear(con)
 
         if inventory_index is not None and previous_game_state != GameStates.PLAYER_DEAD and inventory_index < len(
                 player.inventory.items):
@@ -249,6 +250,7 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 player.skills.add_skill(fireball)
             elif job == 'psy':
                 player.fighter.base_psyche += 3
+                player.fighter.job = 5
                 skill_component = Skill(use_function=cast_mind_lightning, maximum_range=5, hunger_cost = 40 + player.fighter.psyche / 2)
                 psybolt = Entity(0, 0, ' ', libtcod.yellow, 'PsyBolt', skill=skill_component)
                 player.skills.add_skill(psybolt)
@@ -337,23 +339,16 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
         if exit:
             if game_state in (GameStates.SHOW_INVENTORY, GameStates.DROP_INVENTORY, GameStates.CHARACTER_SCREEN):
                 game_state = previous_game_state
-                libtcod.console_flush()
-                libtcod.console_clear(con)
             elif game_state == GameStates.SHOW_SKILL_MENU:
                 game_state = GameStates.PLAYERS_TURN
-                libtcod.console_flush()
-                libtcod.console_clear(con)
             elif game_state == GameStates.TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
-                libtcod.console_flush()
-                libtcod.console_clear(con)
             elif game_state == GameStates.SKILL_TARGETING:
                 player_turn_results.append({'targeting_cancelled': True})
-                libtcod.console_flush()
-                libtcod.console_clear(con)
             else:
                 save_game(player, entities, game_map, message_log, game_state)
                 libtcod.console_flush()
+                libtcod.console_clear(panel)
                 libtcod.console_clear(con)
 
                 return True

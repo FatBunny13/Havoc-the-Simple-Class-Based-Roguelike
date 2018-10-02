@@ -89,10 +89,13 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
             destination_y = player.y + dy
 
             if player.fighter.job == 5:
-                skill_component = Skill(use_function=cast_charm, targeting=True, targeting_message=Message(
-                    'Left-click an enemy to charm it, or right-click to cancel.', libtcod.light_cyan))
-                charm = Entity(player.x, player.y, ' ', libtcod.light_pink, 'Charm Enemy',
-                              skill=skill_component)
+                skill_component = Skill(use_function=cast_charm, hunger_cost=10, skill_targeting=True,
+                                        targeting_message=Message(
+                                            'Left-click a target tile to charm them, or right-click to cancel.',
+                                            libtcod.light_cyan))
+                x = entity.x
+                y = entity.y
+                charm = Entity(x, y, '?', libtcod.red, 'Charm Enemy', skill=skill_component)
                 player.skills.add_skill(charm)
 
             if player.fighter.nutrition <= 0:

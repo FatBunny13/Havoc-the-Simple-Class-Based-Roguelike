@@ -1,7 +1,7 @@
 import libtcodpy as libtcod
 from random import randint
 
-from components.ai import BasicMonster, SlimeMonster, ShrubMonster
+from components.ai import BasicMonster, SlimeMonster, ShrubMonster,CharmedMonster
 from components.equipment import EquipmentSlots, Equipment
 from components.equippable import Equippable
 from fighter import Fighter

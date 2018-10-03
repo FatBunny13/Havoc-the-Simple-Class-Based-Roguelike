@@ -230,7 +230,7 @@ class GameMap:
 
                 if monster_choice == 'orc':
                     fighter_component = Fighter(hp=20, defense=2, power=5, xp=5000, agility=1,mana = 0,base_psyche = 0)
-                    ai_component = CharmedMonster()
+                    ai_component = BasicMonster()
 
                     monster = Entity(x, y, 'o', libtcod.desaturated_green, 'Orc', blocks=True,
                                      render_order=RenderOrder.ACTOR, fighter=fighter_component, ai=ai_component)

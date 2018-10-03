@@ -7,6 +7,9 @@ class Skills:
         self.capacity = capacity
         self.number_of_skills = []
 
+    def __eq__(self, other):
+        return self.__class__ is other.__class__
+
     def add_skill(self, skill):
         results = []
 

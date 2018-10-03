@@ -79,24 +79,14 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
 
         player_turn_results = []
 
-
         if move and game_state == GameStates.PLAYERS_TURN:
+            #The starvation variable increases or decreases as the player gets more psyche and gets hungrier.
             libtcod.console_flush()
             starvation_variable = 1
             player.fighter.nutrition -= 1
             dx, dy = move
             destination_x = player.x + dx
             destination_y = player.y + dy
-
-            if player.fighter.job == 5:
-                skill_component = Skill(use_function=cast_charm, hunger_cost=10, skill_targeting=True,
-                                        targeting_message=Message(
-                                            'Left-click a target tile to charm them, or right-click to cancel.',
-                                            libtcod.light_cyan))
-                x = entity.x
-                y = entity.y
-                charm = Entity(x, y, '?', libtcod.red, 'Charm Enemy', skill=skill_component)
-                player.skills.add_skill(charm)
 
             if player.fighter.nutrition <= 0:
                 kill_player(player)
@@ -252,11 +242,23 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 fireball = Entity(x, y, '?', libtcod.red, 'Fireball',skill=skill_component)
                 player.skills.add_skill(fireball)
             elif job == 'psy':
+                skill_component = Skill(use_function=cast_charm, hunger_cost=10, skill_targeting=True,
+                                        targeting_message=Message(
+                                            'Left-click a target tile to charm them, or right-click to cancel.',
+                                            libtcod.light_cyan))
+                x = entity.x
+                y = entity.y
+                charm = Entity(x, y, '?', libtcod.red, 'Charm Enemy', skill=skill_component)
                 player.fighter.base_psyche += 3
                 player.fighter.job = 5
                 skill_component = Skill(use_function=cast_mind_lightning, maximum_range=5, hunger_cost = 40 + player.fighter.psyche / 2)
                 psybolt = Entity(0, 0, ' ', libtcod.yellow, 'PsyBolt', skill=skill_component)
                 player.skills.add_skill(psybolt)
+                if charm in player.skills.number_of_skills:
+                    pass
+                else:
+                    player.skills.add_skill(charm)
+
             libtcod.console_flush()
             libtcod.console_clear(con)
             game_state = GameStates.PLAYERS_TURN
@@ -448,7 +450,6 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                     previous_game_state = game_state
                     game_state = GameStates.LEVEL_UP
 
-
         if game_state == GameStates.ENEMY_TURN:
 
             if player.fighter.nutrition <= 0:
@@ -485,7 +486,6 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                         break
             else:
                 game_state = GameStates.PLAYERS_TURN
-
 
 def main():
     constants = get_constants()

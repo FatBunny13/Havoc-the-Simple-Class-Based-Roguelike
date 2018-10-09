@@ -4,3 +4,4 @@ class Skill:
         self.skill_targeting = skill_targeting
         self.targeting_message = targeting_message
         self.function_kwargs = kwargs
+

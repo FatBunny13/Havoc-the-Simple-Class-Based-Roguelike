@@ -5,7 +5,22 @@ import math
 from components.item import Item
 
 from render_functions import RenderOrder
+class SkillEntity:
+    """
+    A generic object to represent skills and other items that dont need tiles.
+    """
+    def __init__(self, char, color, name,skill=None, skills=None):
+        self.char = char
+        self.color = color
+        self.name = name
+        self.skill = skill
+        self.skills = skills
 
+        if self.skill:
+            self.skill.owner = self
+
+        if self.skills:
+            self.skills.owner = self
 
 class Entity:
     """

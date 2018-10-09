@@ -1,7 +1,7 @@
 import tcod as libtcod
 
 from death_functions import kill_monster, kill_player
-from entity import get_blocking_entities_at_location
+from entity import SkillEntity, get_blocking_entities_at_location
 from fov_functions import initialize_fov, recompute_fov
 from game_messages import Message
 from game_states import GameStates
@@ -15,6 +15,7 @@ from item_functions import prayer, cast_tornado, heal, cast_lightning,cast_mind_
 from components.skills import Skills
 from components.skill import Skill
 from entity import Entity
+from skill_classes.skill_functions import Charm
 
 
 def play_game(player, entities, game_map, message_log,game_state, con, panel, constants):
@@ -165,8 +166,8 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 libtcod.console_clear(con)
 
         if skill_index is not None and previous_game_state != GameStates.PLAYER_DEAD and skill_index < len(
-                player.skills.number_of_skills):
-            skill = player.skills.number_of_skills[skill_index]
+                player.skills.skill_list):
+            skill = player.skills.skill_list[skill_index]
 
             if game_state == GameStates.SHOW_SKILL_MENU:
                 player_turn_results.extend(player.skills.use(skill, entities=entities, fov_map=fov_map))
@@ -242,22 +243,15 @@ def play_game(player, entities, game_map, message_log,game_state, con, panel, co
                 fireball = Entity(x, y, '?', libtcod.red, 'Fireball',skill=skill_component)
                 player.skills.add_skill(fireball)
             elif job == 'psy':
-                skill_component = Skill(use_function=cast_charm, hunger_cost=10, skill_targeting=True,
-                                        targeting_message=Message(
-                                            'Left-click a target tile to charm them, or right-click to cancel.',
-                                            libtcod.light_cyan))
-                x = entity.x
-                y = entity.y
-                charm = Entity(x, y, '?', libtcod.red, 'Charm Enemy', skill=skill_component)
+                skill_component = Charm()
+                charm = SkillEntity(' ', libtcod.yellow, 'Charm', skill=skill_component)
                 player.fighter.base_psyche += 3
                 player.fighter.job = 5
                 skill_component = Skill(use_function=cast_mind_lightning, maximum_range=5, hunger_cost = 40 + player.fighter.psyche / 2)
                 psybolt = Entity(0, 0, ' ', libtcod.yellow, 'PsyBolt', skill=skill_component)
                 player.skills.add_skill(psybolt)
-                if charm in player.skills.number_of_skills:
-                    pass
-                else:
-                    player.skills.add_skill(charm)
+                player.skills.add_skill(charm)
+
 
             libtcod.console_flush()
             libtcod.console_clear(con)
